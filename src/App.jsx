@@ -65,7 +65,7 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
 
 function DraggableComponent({ item, selected, onSelect, onMove }) {
   const start = useRef(null);
-  return <div className={`placed-component ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); start.current = { x: event.clientX - item.x, y: event.clientY - item.y }; }} onPointerMove={(event) => { if (start.current) onMove(event.clientX - start.current.x, event.clientY - start.current.y); }} onPointerUp={() => { start.current = null; }}><Icon tone="logic-glyph">{item.glyph}</Icon><b>{item.label}</b><small>{item.part}</small></div>;
+  return <div className={`placed-component ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y, transform: `rotate(${item.rotation || 0}deg)` }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); start.current = { x: event.clientX - item.x, y: event.clientY - item.y }; }} onPointerMove={(event) => { if (start.current) onMove(event.clientX - start.current.x, event.clientY - start.current.y); }} onPointerUp={() => { start.current = null; }}><Icon tone="logic-glyph">{item.glyph}</Icon><b>{item.label}</b><small>{item.part}</small></div>;
 }
 
 function Inspector({ current, call, destination, setCall, setDestination, run, running, progress, mode, setMode }) {
@@ -89,6 +89,8 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [wireMode, setWireMode] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
+  const [past, setPast] = useState([]);
+  const [future, setFuture] = useState([]);
   const [connections, setConnections] = useState(() => JSON.parse(localStorage.getItem("circuitsim-connections") || "[]"));
   const timer = useRef(null);
   const logs = useMemo(() => [`Comparando piso actual ${bits(current)} con destino ${bits(destination)}...`, `Registro de llamada actualizado Q = ${bits(call)}`], [current, call, destination]);
@@ -137,11 +139,70 @@ export default function App() {
   }
   const [placed, setPlaced] = useState(() => JSON.parse(localStorage.getItem("circuitsim-placed") || "[]"));
   const [selectedComponent, setSelectedComponent] = useState(null);
+  function commitPlaced(update) {
+    setPlaced((previous) => {
+      const next = typeof update === "function" ? update(previous) : update;
+      if (JSON.stringify(previous) === JSON.stringify(next)) return previous;
+      setPast((items) => [...items, previous].slice(-50));
+      setFuture([]);
+      return next;
+    });
+  }
+  function addComponent(item) {
+    commitPlaced((items) => [...items, { ...item, id: `${item.id}-${Date.now()}`, x: 180 + (items.length % 5) * 105, y: 180 + Math.floor(items.length / 5) * 70, rotation: 0 }]);
+  }
+  function undo() {
+    setPast((items) => {
+      if (!items.length) return items;
+      const previous = items[items.length - 1];
+      setFuture((redo) => [placed, ...redo].slice(0, 50));
+      setPlaced(previous);
+      return items.slice(0, -1);
+    });
+    setSelectedComponent(null);
+  }
+  function redo() {
+    setFuture((items) => {
+      if (!items.length) return items;
+      const next = items[0];
+      setPast((history) => [...history, placed].slice(-50));
+      setPlaced(next);
+      return items.slice(1);
+    });
+  }
+  function deleteSelected() {
+    if (selectedComponent) {
+      commitPlaced((items) => items.filter((item) => item.id !== selectedComponent));
+      setSelectedComponent(null);
+    }
+  }
+  function duplicateSelected() {
+    const source = placed.find((item) => item.id === selectedComponent);
+    if (!source) return;
+    const copy = { ...source, id: `${source.id}-copy-${Date.now()}`, x: source.x + 24, y: source.y + 24 };
+    commitPlaced((items) => [...items, copy]);
+    setSelectedComponent(copy.id);
+  }
+  function rotateSelected() {
+    if (selectedComponent) commitPlaced((items) => items.map((item) => item.id === selectedComponent ? { ...item, rotation: (item.rotation || 0) + 90 } : item));
+  }
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.target.matches("input,textarea")) return;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") { event.preventDefault(); event.shiftKey ? redo() : undo(); }
+      else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y") { event.preventDefault(); redo(); }
+      else if (event.key === "Delete" || event.key === "Backspace") deleteSelected();
+      else if (event.key.toLowerCase() === "r") rotateSelected();
+      else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d") { event.preventDefault(); duplicateSelected(); }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
   useEffect(() => localStorage.setItem("circuitsim-placed", JSON.stringify(placed)), [placed]);
   useEffect(() => localStorage.setItem("circuitsim-connections", JSON.stringify(connections)), [connections]);
   const selected = placed.find((item) => item.id === selectedComponent);
   const diagnostics = validateElectricalConnections(connections);
   const digitalSimulation = simulateDigitalCircuit({ connections, cycles: running ? 1 : 0 });
   const validation = connections.length === 0 ? "Sin conexiones añadidas" : diagnostics.length ? "Advertencia: posible cortocircuito de alimentación" : "Conexiones sin cortocircuitos detectados";
-  return <div className="app-shell"><Sidebar search={search} setSearch={setSearch} onComponent={(name) => console.info(`${name} seleccionado`)} /><main className="workspace"><header className="topbar"><div className="breadcrumbs"><span>Mis proyectos</span><b>/</b><strong>Ascensor 4 pisos</strong><span className="saved">● Guardado ahora</span></div><div className="top-actions"><button className="icon-button">↶</button><button className="icon-button">↷</button><span className="divider" /><button className="ghost-button">Compartir</button><button className="primary-button" onClick={run}><span>▶</span> Simular</button></div></header><CircuitCanvas current={current} call={call} destination={destination} zoom={zoom} setZoom={setZoom} wireMode={wireMode} setWireMode={(enabled) => { setWireMode(enabled); setSelectedPin(null); }} connections={connections} onPin={connectPin} selectedPin={selectedPin} placed={placed} setPlaced={setPlaced} selectedComponent={selectedComponent} setSelectedComponent={setSelectedComponent} /><section className="bottom-panel"><div className="panel-tabs"><button className="panel-tab active">Consola</button><button className="panel-tab">Propiedades</button><span className="panel-expand">⌃</span></div><div className="console">{logs.map((log) => <div className="console-line" key={log}><span className="console-time">10:03:21</span><span className="console-info">●</span> {log}</div>)}<div className="console-line"><span className="console-info">●</span> {validation}</div><div className="console-line"><span className="console-info">●</span> Motor digital: {digitalSimulation.nodes.length} nodos, {digitalSimulation.diagnostics.length} conflictos</div>{selected && <div className="console-line"><span className="console-ok">✓</span> Seleccionado: <b>{selected.label}</b> · posición {Math.round(selected.x)}, {Math.round(selected.y)}</div>}<div className="console-cursor">_</div></div></section></main><Inspector current={current} call={call} destination={destination} setCall={setCall} setDestination={setDestination} run={run} running={running} progress={progress} mode={mode} setMode={setMode} /></div>;
+  return <div className="app-shell"><Sidebar search={search} setSearch={setSearch} onComponent={addComponent} /><main className="workspace"><header className="topbar"><div className="breadcrumbs"><span>Mis proyectos</span><b>/</b><strong>Ascensor 4 pisos</strong><span className="saved">● Guardado ahora</span></div><div className="top-actions"><button className="icon-button" onClick={undo} title="Deshacer">↶</button><button className="icon-button" onClick={redo} title="Rehacer">↷</button><span className="divider" /><button className="ghost-button">Compartir</button><button className="primary-button" onClick={run}><span>▶</span> Simular</button></div></header><CircuitCanvas current={current} call={call} destination={destination} zoom={zoom} setZoom={setZoom} wireMode={wireMode} setWireMode={(enabled) => { setWireMode(enabled); setSelectedPin(null); }} connections={connections} onPin={connectPin} selectedPin={selectedPin} placed={placed} setPlaced={setPlaced} selectedComponent={selectedComponent} setSelectedComponent={setSelectedComponent} /><section className="bottom-panel"><div className="panel-tabs"><button className="panel-tab active">Consola</button><button className="panel-tab">Propiedades</button><span className="panel-expand">⌃</span></div><div className="console">{logs.map((log) => <div className="console-line" key={log}><span className="console-time">10:03:21</span><span className="console-info">●</span> {log}</div>)}<div className="console-line"><span className="console-info">●</span> {validation}</div><div className="console-line"><span className="console-info">●</span> Motor digital: {digitalSimulation.nodes.length} nodos, {digitalSimulation.diagnostics.length} conflictos</div>{selected && <div className="console-line"><span className="console-ok">✓</span> Seleccionado: <b>{selected.label}</b> · posición {Math.round(selected.x)}, {Math.round(selected.y)}</div>}<div className="console-cursor">_</div></div></section></main><Inspector current={current} call={call} destination={destination} setCall={setCall} setDestination={setDestination} run={run} running={running} progress={progress} mode={mode} setMode={setMode} /></div>;
 }
