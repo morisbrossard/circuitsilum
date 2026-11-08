@@ -43,7 +43,7 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
       <div className="tink-header"><div><b>Ascensor digital</b><span>Diseño físico · protoboard</span></div><div className="tink-status"><span /> Guardado ahora</div></div>
       <div className="tink-stage clean-stage">
         <div className="empty-workspace">
-          <div className="empty-workspace-copy"><b>Lienzo vacío</b><span>Arrastra componentes desde la biblioteca para comenzar</span></div>
+          {!placed.length && <div className="empty-workspace-copy"><b>Lienzo vacío</b><span>Arrastra componentes desde la biblioteca para comenzar</span></div>}
           {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
         </div>
       </div>
@@ -54,7 +54,28 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
 
 function DraggableComponent({ item, selected, onSelect, onMove }) {
   const start = useRef(null);
-  return <div className={`placed-component ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y, transform: `rotate(${item.rotation || 0}deg)` }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); start.current = { x: event.clientX - item.x, y: event.clientY - item.y }; }} onPointerMove={(event) => { if (start.current) onMove(event.clientX - start.current.x, event.clientY - start.current.y); }} onPointerUp={() => { start.current = null; }}><Icon tone="logic-glyph">{item.glyph}</Icon><b>{item.label}</b><small>{item.part}</small></div>;
+  const handlePointerDown = (event) => {
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    start.current = { x: event.clientX - item.x, y: event.clientY - item.y };
+  };
+  const handlePointerMove = (event) => {
+    if (start.current) onMove(event.clientX - start.current.x, event.clientY - start.current.y);
+  };
+  const handlePointerUp = () => { start.current = null; };
+  if (item.kind === "breadboard") {
+    const columns = Array.from({ length: 30 }, (_, index) => index + 1);
+    const holes = (prefix) => columns.map((column) => <div className="breadboard-column" key={`${prefix}-${column}`}>{Array.from({ length: 5 }, (_, hole) => <span key={hole} />)}</div>);
+    return <div className={`placed-component breadboard-instance ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y, transform: `rotate(${item.rotation || 0}deg)` }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
+      <div className="breadboard-rail breadboard-rail-top"><b>+</b><span /> <b>−</b></div>
+      <div className="breadboard-scale">{columns.filter((column) => column % 5 === 0).map((column) => <b key={column}>{column}</b>)}</div>
+      <div className="breadboard-bank breadboard-bank-upper"><span className="breadboard-label">a&nbsp; b&nbsp; c&nbsp; d&nbsp; e</span>{holes("upper")}</div>
+      <div className="breadboard-channel" />
+      <div className="breadboard-bank breadboard-bank-lower"><span className="breadboard-label">f&nbsp; g&nbsp; h&nbsp; i&nbsp; j</span>{holes("lower")}</div>
+      <div className="breadboard-rail breadboard-rail-bottom"><b>+</b><span /> <b>−</b></div>
+    </div>;
+  }
+  return <div className={`placed-component ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y, transform: `rotate(${item.rotation || 0}deg)` }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}><Icon tone="logic-glyph">{item.glyph}</Icon><b>{item.label}</b><small>{item.part}</small></div>;
 }
 
 function Inspector({ current, call, destination, setCall, setDestination, run, running, progress, mode, setMode }) {

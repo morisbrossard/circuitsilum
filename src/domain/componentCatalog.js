@@ -19,6 +19,9 @@ const digital = (id, label, part, glyph = "▣", simulation = simulationLevels.p
 });
 
 export const componentCatalog = [
+  { group: "Herramientas", items: [
+    { id: "breadboard", label: "Protoboard", part: "830 puntos", glyph: "▦", category: "Herramientas de montaje", simulation: simulationLevels.visual, kind: "breadboard" },
+  ] },
   { group: "Entradas", items: [
     { id: "pushbutton", label: "Pushbutton", part: "IN", glyph: "●", category: "Elementos de interacción", simulation: simulationLevels.complete },
     { id: "switch", label: "Switch", part: "IN", glyph: "↔", category: "Elementos de interacción", simulation: simulationLevels.complete },
