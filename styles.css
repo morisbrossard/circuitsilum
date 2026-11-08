@@ -129,7 +129,7 @@ body{overflow:auto}
 .micro-board{padding:5px!important;font-size:5px!important;box-shadow:0 2px 3px #0003!important}.micro-board small{font-size:3.5px!important}.arduino-board{left:45px!important;top:485px!important;width:104px!important;height:38px!important}.raspberry-board{left:700px!important;top:485px!important;width:120px!important;height:44px!important}.header-pins{gap:3px!important;margin-top:3px!important}.header-pins i{width:3px!important;height:3px!important}
 .camera-board{left:750px!important;top:55px!important;padding:4px!important;font-size:4px!important}.camera-board span{font-size:11px!important}.speaker-board{left:840px!important;top:90px!important;padding:4px!important;font-size:9px!important}.servo-board{left:590px!important;top:485px!important;width:48px!important;height:38px!important;padding:4px!important;font-size:5px!important}.servo-board small{font-size:3px!important}.servo-knob{width:12px!important;height:12px!important}
 .breadboard-canvas .drop-hint{display:none}.breadboard-canvas .connection-help{bottom:8px!important;font-size:7px!important}
-.board-wires{display:block!important;z-index:18!important}.board-wires .red-wire,.board-wires .blue-wire,.board-wires .yellow-wire,.board-wires .green-wire,.board-wires .orange-wire{display:none}
+.board-wires{display:block!important;z-index:18!important}.board-wire{display:block!important;stroke-width:2.5!important;fill:none!important;stroke-linecap:round!important;filter:none!important}.red-wire{stroke:#d94f4f}.blue-wire{stroke:#2d9bd0}.yellow-wire{stroke:#d6ad2d}.green-wire{stroke:#42a86c}.orange-wire{stroke:#db812e}
 .canvas-wrap{min-width:0!important}.canvas{min-width:0!important}
 @media(max-width:1100px){.app-shell{grid-template-columns:220px minmax(0,1fr)}}
 
@@ -145,10 +145,10 @@ body{overflow:auto}
 .terminal-field.upper{top:62px!important;height:92px!important}.terminal-field.lower{top:305px!important;height:105px!important}
 .terminal-row{height:6px!important}.center-groove{top:170px!important;height:140px!important;background:#e5e8ea!important;border-top:1px solid #d5dadd!important;border-bottom:1px solid #fff!important}
 .board-numbers.top{top:34px!important}.board-numbers.bottom{top:437px!important}
-.real-dip{width:128px!important;height:100px!important;padding-top:43px!important;border-radius:3px!important;font-size:8px!important;box-shadow:0 2px 4px #0005!important}
-.real-dip:before{top:48px!important;height:2px!important}.dip-notch{top:-1px!important;width:14px!important;height:5px!important}.dip-pins.top{top:-14px!important}.dip-pins.bottom{bottom:-14px!important}.dip-pins span{width:8px!important;font-size:3px!important;line-height:6px!important}.dip-pins i{height:14px!important;width:1px!important}
-.dip-registers{left:85px!important;top:180px!important}.dip-decoder-a{left:290px!important;top:180px!important}.dip-decoder-b{left:495px!important;top:180px!important}
-.dip-comparator-a{left:190px!important;top:360px!important}.dip-comparator-b{left:395px!important;top:360px!important}.dip-mux-a{left:600px!important;top:360px!important}.dip-mux-b{left:755px!important;top:360px!important}
+.real-dip{width:128px!important;height:122px!important;padding-top:53px!important;border-radius:3px!important;font-size:8px!important;box-shadow:0 2px 4px #0005!important}
+.real-dip:before{top:59px!important;height:2px!important}.dip-notch{top:-1px!important;width:14px!important;height:5px!important}.dip-pins.top{top:-14px!important}.dip-pins.bottom{bottom:-14px!important}.dip-pins span{width:8px!important;font-size:3px!important;line-height:6px!important}.dip-pins i{height:14px!important;width:1px!important}
+.dip-registers{left:85px!important;top:165px!important}.dip-decoder-a{left:290px!important;top:165px!important}.dip-decoder-b{left:495px!important;top:165px!important}
+.dip-comparator-a{left:190px!important;top:345px!important}.dip-comparator-b{left:395px!important;top:345px!important}.dip-mux-a{left:600px!important;top:345px!important}.dip-mux-b{left:755px!important;top:345px!important}
 .label-chip{left:85px!important;top:160px!important}.label-decoder-a{left:290px!important;top:160px!important}.label-decoder-b{left:495px!important;top:160px!important}.label-comparator-a{left:190px!important;top:340px!important}.label-comparator-b{left:395px!important;top:340px!important}.label-mux{left:600px!important;top:340px!important}
 .physical-display{width:20px!important;height:30px!important}.call-display{left:435px!important;top:220px!important}.destination-display{left:640px!important;top:220px!important}
 .dip-switch{left:55px!important;top:80px!important}.label-switch{left:55px!important;top:67px!important}
