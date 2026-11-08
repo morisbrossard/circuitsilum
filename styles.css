@@ -209,6 +209,13 @@ body{overflow:auto}
 .board-scale{left:61px;right:61px;top:91px;font-size:8px;color:#50585d}
 .board-markers{left:20px;letter-spacing:3px;writing-mode:vertical-rl;transform:rotate(180deg);line-height:1;color:#525b60}
 .upper-marker{top:155px}.lower-marker{top:424px}
+
+/* The board starts clean; only user-created connections are rendered. */
+.tink-workspace{background:#dfe3e6!important;background-image:none!important}
+.tink-stage{background:transparent!important}
+.tink-board:after{opacity:.7}
+.tink-wires .wire-cyan{stroke:#35b9bb;filter:drop-shadow(0 1px 1px #4c666655)}
+.wire-red,.wire-blue,.wire-yellow,.wire-green,.wire-purple{display:none!important}
 .tink-contact-overlay{left:61px;right:61px;top:76px;height:453px;grid-template-columns:repeat(30,minmax(0,1fr));grid-template-rows:repeat(5,28px) 161px repeat(5,28px);column-gap:0}
 .tink-contact:nth-child(5n){margin-right:0}
 
