@@ -159,7 +159,7 @@ export default function App() {
     });
   }
   function addComponent(item) {
-    commitPlaced((items) => [...items, { ...item, id: `${item.id}-${Date.now()}`, x: 180 + (items.length % 5) * 105, y: 180 + Math.floor(items.length / 5) * 70, rotation: 0 }]);
+    commitPlaced((items) => [...items, { ...item, id: `${item.id}-${Date.now()}`, x: item.kind === "breadboard" ? 24 : 180 + (items.length % 5) * 105, y: item.kind === "breadboard" ? 64 : 180 + Math.floor(items.length / 5) * 70, rotation: 0 }]);
   }
   function undo() {
     setPast((items) => {

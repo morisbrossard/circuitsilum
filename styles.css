@@ -220,7 +220,7 @@ body{overflow:auto}
 /* Start with an uncluttered canvas. The physical board is added by the user
    from the library instead of being a hard-coded background scene. */
 .clean-stage{min-height:calc(100% - 58px);padding:24px!important;display:block!important}
-.empty-workspace{position:relative;min-width:760px;min-height:520px;height:100%;border:1px dashed #c5cdd2;border-radius:8px;background:#eef1f3;overflow:hidden}
+.empty-workspace{position:relative;min-width:760px;min-height:520px;height:100%;border:1px dashed #c5cdd2;border-radius:8px;background:#eef1f3;overflow:auto}
 .empty-workspace-copy{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#8a969d;pointer-events:none}
 .empty-workspace-copy b{font-size:14px;color:#66737b}.empty-workspace-copy span{font-size:11px;margin-top:6px}
 .empty-workspace .placed-component{z-index:3}
