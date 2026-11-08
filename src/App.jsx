@@ -68,14 +68,14 @@ function DraggableComponent({ item, selected, onSelect, onMove }) {
     const holes = (prefix) => columns.map((column) => <div className="breadboard-column" key={`${prefix}-${column}`}>{Array.from({ length: 5 }, (_, hole) => <span key={hole} />)}</div>);
     const powerTrack = (prefix) => <span className="breadboard-track">{columns.map((column) => <i key={`${prefix}-${column}`} />)}</span>;
     return <div className={`placed-component breadboard-instance ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y, transform: `rotate(${item.rotation || 0}deg)` }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
-      <div className="breadboard-rail breadboard-rail-top-positive"><b>+</b>{powerTrack("top-positive")}</div>
       <div className="breadboard-rail breadboard-rail-top-negative"><b>−</b>{powerTrack("top-negative")}</div>
+      <div className="breadboard-rail breadboard-rail-top-positive"><b>+</b>{powerTrack("top-positive")}</div>
       <div className="breadboard-scale">{columns.filter((column) => column % 5 === 0).map((column) => <b key={column}>{column}</b>)}</div>
       <div className="breadboard-bank breadboard-bank-upper"><span className="breadboard-label">a&nbsp; b&nbsp; c&nbsp; d&nbsp; e</span>{holes("upper")}</div>
       <div className="breadboard-channel" />
       <div className="breadboard-bank breadboard-bank-lower"><span className="breadboard-label">f&nbsp; g&nbsp; h&nbsp; i&nbsp; j</span>{holes("lower")}</div>
-      <div className="breadboard-rail breadboard-rail-bottom-positive"><b>+</b>{powerTrack("bottom-positive")}</div>
       <div className="breadboard-rail breadboard-rail-bottom-negative"><b>−</b>{powerTrack("bottom-negative")}</div>
+      <div className="breadboard-rail breadboard-rail-bottom-positive"><b>+</b>{powerTrack("bottom-positive")}</div>
     </div>;
   }
   return <div className={`placed-component ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y, transform: `rotate(${item.rotation || 0}deg)` }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}><Icon tone="logic-glyph">{item.glyph}</Icon><b>{item.label}</b><small>{item.part}</small></div>;
