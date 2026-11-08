@@ -162,7 +162,7 @@ body{overflow:auto}
 
 /* New Tinkercad-style physical editor. This intentionally replaces the
    previous diagram-like board rather than layering more overrides on it. */
-.tink-workspace{background:#dfe3e6!important;overflow:auto!important;padding:0!important}
+.tink-workspace{background:#dfe3e6!important;overflow:auto!important;padding:0!important;scroll-behavior:auto}
 .tink-header{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:#f7f8f9;border-bottom:1px solid #cbd1d5;color:#68747c}
 .tink-header b{display:block;color:#27323a;font-size:13px}.tink-header span{display:block;font-size:9px;margin-top:3px}.tink-status{font-size:9px}.tink-status span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#32aa72;margin-right:5px}
 .tink-stage{min-height:calc(100% - 58px);padding:48px 45px 70px;display:flex;justify-content:center;align-items:flex-start}
@@ -219,8 +219,8 @@ body{overflow:auto}
 
 /* Start with an uncluttered canvas. The physical board is added by the user
    from the library instead of being a hard-coded background scene. */
-.clean-stage{min-height:calc(100% - 58px);padding:24px!important;display:block!important}
-.empty-workspace{position:relative;min-width:760px;min-height:520px;height:100%;border:1px dashed #c5cdd2;border-radius:8px;background:#eef1f3;overflow:auto}
+.clean-stage{width:2400px;min-width:2400px;height:1600px;min-height:1600px;padding:80px!important;display:block!important;background-color:#e4e8ea!important;background-image:linear-gradient(#d7dde0 1px,transparent 1px),linear-gradient(90deg,#d7dde0 1px,transparent 1px)!important;background-size:24px 24px!important}
+.empty-workspace{position:relative;width:2240px;min-width:2240px;height:1440px;min-height:1440px;border:1px dashed #c5cdd2;border-radius:8px;background:rgba(238,241,243,.58);overflow:visible}
 .empty-workspace-copy{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#8a969d;pointer-events:none}
 .empty-workspace-copy b{font-size:14px;color:#66737b}.empty-workspace-copy span{font-size:11px;margin-top:6px}
 .empty-workspace .placed-component{z-index:3}
