@@ -70,10 +70,10 @@ function DraggableComponent({ item, selected, onSelect, onMove }) {
     return <div className={`placed-component breadboard-instance ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y, transform: `rotate(${item.rotation || 0}deg)` }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp}>
       <div className="breadboard-rail breadboard-rail-top-negative"><b>−</b>{powerTrack("top-negative")}</div>
       <div className="breadboard-rail breadboard-rail-top-positive"><b>+</b>{powerTrack("top-positive")}</div>
-      <div className="breadboard-scale">{columns.filter((column) => column % 5 === 0).map((column) => <b key={column}>{column}</b>)}</div>
-      <div className="breadboard-bank breadboard-bank-upper"><span className="breadboard-label">a&nbsp; b&nbsp; c&nbsp; d&nbsp; e</span>{holes("upper")}</div>
+      <div className="breadboard-scale breadboard-scale-top">{columns.map((column) => <b key={column}>{column}</b>)}</div>
+      <div className="breadboard-bank breadboard-bank-upper"><span className="breadboard-label breadboard-label-left">{["j", "i", "h", "g", "f"].map((letter) => <i key={letter}>{letter}</i>)}</span>{holes("upper")}<span className="breadboard-label breadboard-label-right">{["j", "i", "h", "g", "f"].map((letter) => <i key={letter}>{letter}</i>)}</span></div>
       <div className="breadboard-channel" />
-      <div className="breadboard-bank breadboard-bank-lower"><span className="breadboard-label">f&nbsp; g&nbsp; h&nbsp; i&nbsp; j</span>{holes("lower")}</div>
+      <div className="breadboard-bank breadboard-bank-lower"><span className="breadboard-label breadboard-label-left">{["e", "d", "c", "b", "a"].map((letter) => <i key={letter}>{letter}</i>)}</span>{holes("lower")}<span className="breadboard-label breadboard-label-right">{["e", "d", "c", "b", "a"].map((letter) => <i key={letter}>{letter}</i>)}</span><div className="breadboard-scale breadboard-scale-bottom">{columns.map((column) => <b key={column}>{column}</b>)}</div></div>
       <div className="breadboard-rail breadboard-rail-bottom-negative"><b>−</b>{powerTrack("bottom-negative")}</div>
       <div className="breadboard-rail breadboard-rail-bottom-positive"><b>+</b>{powerTrack("bottom-positive")}</div>
     </div>;
