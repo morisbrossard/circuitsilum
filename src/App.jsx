@@ -35,9 +35,9 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
   const columns = Array.from({ length: 60 }, (_, index) => index + 1);
   const angle = -90 + (current - 1) * 60;
   const chips = [
-    ["74LS74", "state-chip", 13, 3], ["74LS48", "decode-chip", 31, 3],
-    ["74LS48", "decode-chip", 43, 3], ["74LS85", "compare-chip", 22, 8],
-    ["74LS85", "compare-chip", 35, 8], ["74LS153", "mux-chip", 48, 8],
+    ["74LS74", "state-chip", 3, 4], ["74LS48", "decode-chip", 14, 4],
+    ["74LS48", "decode-chip", 25, 4], ["74LS85", "compare-chip", 36, 4],
+    ["74LS85", "compare-chip", 47, 4], ["74LS153", "mux-chip", 58, 4],
   ];
   const HoleGroup = ({ side }) => <div className={`hole-groups ${side}`}>{Array.from({ length: 12 }, (_, group) => <div className="hole-group" key={group}>{Array.from({ length: 5 }, (_, hole) => <span key={hole} />)}</div>)}</div>;
   const Chip = ({ name, tone, column, row }) => <div className={`tink-chip ${tone}`} style={{ left: `${column * 14 + 46}px`, top: `${row * 30 + 132}px` }}><i className="chip-notch" /><b>{name}</b><div className="chip-legs top">{Array.from({ length: 7 }, (_, index) => <span key={index} />)}</div><div className="chip-legs bottom">{Array.from({ length: 7 }, (_, index) => <span key={index} />)}</div></div>;
