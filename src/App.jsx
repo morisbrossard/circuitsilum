@@ -32,37 +32,39 @@ function Pin({ id, selected, onClick }) {
 }
 
 function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, setWireMode, connections, onPin, selectedPin, placed, setPlaced, selectedComponent, setSelectedComponent }) {
-  const columns = Array.from({ length: 30 }, (_, index) => index + 1);
-  const rails = Array.from({ length: 5 }, (_, index) => index);
+  const columns = Array.from({ length: 60 }, (_, index) => index + 1);
   const angle = -90 + (current - 1) * 60;
-  const Dip = ({ className, name, pins }) => <div className={`real-dip ${className}`}><div className="dip-notch" /><b>{name}</b><div className="dip-pins top">{pins.slice(0, pins.length / 2).map((pin) => <span key={pin}><i />{pin}</span>)}</div><div className="dip-pins bottom">{pins.slice(pins.length / 2).reverse().map((pin) => <span key={pin}><i />{pin}</span>)}</div></div>;
-  return <section className="canvas-wrap"><div className="canvas-toolbar"><div className="tool-group"><button className={`tool ${!wireMode ? "active" : ""}`} onClick={() => setWireMode(false)}>↖ <span>Seleccionar</span></button><button className={`tool ${wireMode ? "active" : ""}`} onClick={() => setWireMode(true)}>⌁ <span>Cablear</span></button><button className="tool">✥ <span>Mover lienzo</span></button></div><div className="canvas-controls"><button onClick={() => setZoom(Math.max(70, zoom - 10))}>−</button><span>{zoom}%</span><button onClick={() => setZoom(Math.min(140, zoom + 10))}>＋</button><span className="divider" /><button onClick={() => setZoom(100)}>⌗ Ajustar</button></div></div>
-    <div className="canvas breadboard-canvas" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const data = JSON.parse(event.dataTransfer.getData("component") || "{}"); if (!data.label) return; const rect = event.currentTarget.getBoundingClientRect(); setPlaced((items) => [...items, { id: `${data.id}-${Date.now()}`, ...data, x: event.clientX - rect.left, y: event.clientY - rect.top }]); }}><div className="breadboard-title"><div><b>Ascensor digital</b><span>Protoboard · vista de diseño</span></div><div className="canvas-status"><span /> Simulación detenida</div></div><div className="breadboard">
-      <div className="power-rail positive">+ <span>{columns.map((column) => <i key={column} />)}</span></div><div className="power-rail negative">− <span>{columns.map((column) => <i key={column} />)}</span></div>
-      <div className="board-numbers top">{columns.map((column) => <b key={column}>{column}</b>)}</div><div className="board-numbers bottom">{columns.map((column) => <b key={column}>{column}</b>)}</div>
-      <div className="terminal-field upper">{rails.map((rail) => <div className="terminal-row" key={rail}>{columns.map((column) => <span key={column} className={`contact ${column % 5 === 0 ? "group-end" : ""}`} />)}</div>)}</div><div className="center-groove" /><div className="terminal-field lower">{rails.map((rail) => <div className="terminal-row" key={rail}>{columns.map((column) => <span key={column} className={`contact ${column % 5 === 0 ? "group-end" : ""}`} />)}</div>)}</div>
-      <div className="contact-label upper-label">a b c d e</div><div className="contact-label lower-label">f g h i j</div>
-      <div className="component-label label-chip">REGISTROS DE ESTADO</div><Dip className="dip-registers" name="74LS74" pins={["1CLR","1D","1CLK","1PRE","1Q","1Q̅","2Q̅","2Q","2PRE","2CLK","2D","2CLR","GND","VCC"]} />
-      <div className="component-label label-decoder-a">LLAMADA</div><Dip className="dip-decoder-a" name="74LS48" pins={["LT","BI","RBI","A","B","C","D","GND","e","d","c","b","a","VCC","f","g"]} />
-      <div className="component-label label-decoder-b">DESTINO</div><Dip className="dip-decoder-b" name="74LS48" pins={["LT","BI","RBI","A","B","C","D","GND","e","d","c","b","a","VCC","f","g"]} />
-      <div className="physical-display call-display">{call}</div><div className="physical-display destination-display">{destination}</div>
-      <div className="component-label label-comparator-a">COMPARADOR 1</div><Dip className="dip-comparator-a" name="74LS85" pins={["A0","B0","A1","B1","A2","B2","A3","B3","GND","A>B","A=B","A<B","B3","A3","VCC","B2"]} />
-      <div className="component-label label-comparator-b">COMPARADOR 2</div><Dip className="dip-comparator-b" name="74LS85" pins={["A0","B0","A1","B1","A2","B2","A3","B3","GND","A>B","A=B","A<B","B3","A3","VCC","B2"]} />
-      <div className="component-label label-mux">MUX NORMAL / ACCESIBLE</div><Dip className="dip-mux-a" name="74LS153" pins={["1C0","1C1","1C2","1C3","1Y","1G","2G","2Y","2C3","2C2","2C1","2C0","B","A","VCC","GND"]} /><Dip className="dip-mux-b" name="74LS153" pins={["1C0","1C1","1C2","1C3","1Y","1G","2G","2Y","2C3","2C2","2C1","2C0","B","A","VCC","GND"]} />
-      <div className="component-label label-switch">ENTRADA DE PISO</div><div className="dip-switch">{[1, 2, 3, 4].map((item) => <div className="switch-bit" key={item}><span className={call === item ? "on" : ""} /> <b>{item}</b></div>)}</div>
-      <div className="led-bank">{[1, 2, 3, 4].map((item) => <div className="led-unit" key={item}><span className={`led-bulb ${current === item ? "lit" : ""}`} /><small>P{item}</small></div>)}</div>
-      <div className="direction-leds"><div><span className={`led-bulb direction-up ${current < destination ? "lit" : ""}`} /><small>SUBIDA</small></div><div><span className={`led-bulb direction-down ${current > destination ? "lit" : ""}`} /><small>BAJADA</small></div><div><span className={`led-bulb direction-stop ${current === destination ? "lit" : ""}`} /><small>PARAR</small></div></div>
-      <div className="resistor-bank">{[1, 2, 3, 4, 5, 6].map((item) => <div className="resistor" key={item}><span /><b>220Ω</b><span /></div>)}</div>
-      <div className="wire-bundle"><span className="jumper blue" /><span className="jumper orange" /><span className="jumper yellow" /><span className="jumper green" /><span className="jumper red" /></div>
-      <div className="component-label label-arduino">CONTROL FÍSICO</div><div className="micro-board arduino-board"><b>ARDUINO UNO</b><small>CLK · MUX · SERVO</small><div className="header-pins">{Array.from({ length: 10 }, (_, index) => <i key={index} />)}</div></div>
-      <div className="micro-board raspberry-board"><b>RASPBERRY PI</b><small>USB · AUDIO</small><div className="header-pins">{Array.from({ length: 12 }, (_, index) => <i key={index} />)}</div></div>
-      <div className="camera-board"><span>◉</span><b>ESP32-CAM</b><small>VIDEO USB</small></div><div className="speaker-board">♫ <small>PARLANTE</small></div>
-      <div className="servo-board"><span className="servo-knob" style={{ transform: `rotate(${angle}deg)` }} /><b>SG90</b><small>SERVO · {angle}°</small></div>
-      <div className="contact-overlay">{Array.from({ length: 60 }, (_, index) => <button key={index} className={`board-contact ${selectedPin === `contact:${index}` ? "selected" : ""}`} onClick={() => onPin(`contact:${index}`)} title={`Contacto ${index + 1}`} />)}</div>
-      {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
-      <svg className="board-wires" viewBox="0 0 930 570" preserveAspectRatio="none"><path d="M202 151 C235 145 265 145 300 151" className="board-wire red-wire" /><path d="M188 151 C230 160 270 160 314 151" className="board-wire blue-wire" /><path d="M418 151 C450 145 470 145 505 151" className="board-wire yellow-wire" /><path d="M318 481 C350 489 370 489 405 481" className="board-wire green-wire" /><path d="M728 481 C740 489 753 489 765 481" className="board-wire orange-wire" />{connections.map((connection) => <path key={connection.id} d={connection.path} className="board-wire cyan-wire" />)}</svg>
-      <div className={`connection-help ${wireMode ? "visible" : ""}`}>{wireMode ? "Selecciona dos pines para crear una conexión física" : "Cableado visible · activa Cablear para añadir conexiones"}</div>
-    </div></div></section>;
+  const chips = [
+    ["74LS74", "state-chip", 13, 3], ["74LS48", "decode-chip", 31, 3],
+    ["74LS48", "decode-chip", 43, 3], ["74LS85", "compare-chip", 22, 8],
+    ["74LS85", "compare-chip", 35, 8], ["74LS153", "mux-chip", 48, 8],
+  ];
+  const HoleGroup = ({ side }) => <div className={`hole-groups ${side}`}>{Array.from({ length: 12 }, (_, group) => <div className="hole-group" key={group}>{Array.from({ length: 5 }, (_, hole) => <span key={hole} />)}</div>)}</div>;
+  const Chip = ({ name, tone, column, row }) => <div className={`tink-chip ${tone}`} style={{ left: `${column * 14 + 46}px`, top: `${row * 30 + 132}px` }}><i className="chip-notch" /><b>{name}</b><div className="chip-legs top">{Array.from({ length: 7 }, (_, index) => <span key={index} />)}</div><div className="chip-legs bottom">{Array.from({ length: 7 }, (_, index) => <span key={index} />)}</div></div>;
+  return <section className="canvas-wrap">
+    <div className="canvas-toolbar"><div className="tool-group"><button className={`tool ${!wireMode ? "active" : ""}`} onClick={() => setWireMode(false)}>↖ <span>Seleccionar</span></button><button className={`tool ${wireMode ? "active" : ""}`} onClick={() => setWireMode(true)}>⌁ <span>Cablear</span></button><button className="tool">✥ <span>Mover lienzo</span></button></div><div className="canvas-controls"><button onClick={() => setZoom(Math.max(70, zoom - 10))}>−</button><span>{zoom}%</span><button onClick={() => setZoom(Math.min(140, zoom + 10))}>＋</button><span className="divider" /><button onClick={() => setZoom(100)}>⌗ Ajustar</button></div></div>
+    <div className="canvas tink-workspace" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const data = JSON.parse(event.dataTransfer.getData("component") || "{}"); if (!data.label) return; const rect = event.currentTarget.getBoundingClientRect(); setPlaced((items) => [...items, { id: `${data.id}-${Date.now()}`, ...data, x: event.clientX - rect.left, y: event.clientY - rect.top }]); }}>
+      <div className="tink-header"><div><b>Ascensor digital</b><span>Diseño físico · protoboard</span></div><div className="tink-status"><span /> Guardado ahora</div></div>
+      <div className="tink-stage"><div className="tink-board">
+        <div className="board-rail rail-top"><b>+</b>{columns.map((column) => <i key={column} />)}<b>−</b></div>
+        <div className="board-rail rail-bottom"><b>+</b>{columns.map((column) => <i key={column} />)}<b>−</b></div>
+        <div className="board-scale top">{columns.filter((column) => column % 5 === 0).map((column) => <b key={column}>{column}</b>)}</div>
+        <HoleGroup side="upper" /><HoleGroup side="lower" /><div className="tink-channel" />
+        <div className="board-markers upper-marker">a&nbsp; b&nbsp; c&nbsp; d&nbsp; e</div><div className="board-markers lower-marker">f&nbsp; g&nbsp; h&nbsp; i&nbsp; j</div>
+        <div className="floor-switch">{[1, 2, 3, 4].map((floor) => <button className={call === floor ? "on" : ""} key={floor} onClick={() => onPin(`floor:${floor}`)}>{floor}</button>)}</div>
+        <div className="seven-segment call-seven">{call}</div><div className="seven-segment destination-seven">{destination}</div>
+        {chips.map(([name, tone, column, row]) => <Chip key={`${name}-${column}`} name={name} tone={tone} column={column} row={row} />)}
+        <div className="led-strip">{[1, 2, 3, 4].map((floor) => <div key={floor}><span className={current === floor ? "lit" : ""} /><small>P{floor}</small></div>)}</div>
+        <div className="resistor-strip">{[1, 2, 3, 4, 5].map((item) => <span key={item}><i />220Ω<i /></span>)}</div>
+        <div className="arduino-mini"><b>ARDUINO UNO</b><small>CONTROL</small><div>{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</div></div>
+        <div className="servo-mini"><span className="servo-knob" style={{ transform: `rotate(${angle}deg)` }} /><b>SG90</b></div>
+        <svg className="tink-wires" viewBox="0 0 980 560" preserveAspectRatio="none"><path className="wire-red" d="M120 115 C155 90 190 90 225 115" /><path className="wire-blue" d="M240 115 C290 75 330 75 380 115" /><path className="wire-yellow" d="M425 115 C470 95 505 95 545 115" /><path className="wire-green" d="M300 355 C350 385 390 385 430 355" /><path className="wire-purple" d="M520 355 C570 395 620 395 675 355" />{connections.map((connection) => <path key={connection.id} d={connection.path} className="wire-cyan" />)}</svg>
+        <div className="tink-contact-overlay">{Array.from({ length: 120 }, (_, index) => <button key={index} className={`tink-contact ${selectedPin === `contact:${index}` ? "selected" : ""}`} onClick={() => onPin(`contact:${index}`)} title={`Contacto ${index + 1}`} />)}</div>
+        {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
+      </div></div>
+      <div className={`connection-help ${wireMode ? "visible" : ""}`}>{wireMode ? "Selecciona dos contactos para conectar" : "Arrastra componentes desde la biblioteca y conéctalos por sus contactos"}</div>
+    </div>
+  </section>;
 }
 
 function DraggableComponent({ item, selected, onSelect, onMove }) {
