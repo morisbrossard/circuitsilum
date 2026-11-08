@@ -212,6 +212,7 @@ body{overflow:auto}
 
 /* The board starts clean; only user-created connections are rendered. */
 .tink-workspace{background:#dfe3e6!important;background-image:none!important}
+.tink-workspace{cursor:default}.tink-workspace:active{cursor:grabbing}
 .tink-stage{background:transparent!important}
 .tink-board:after{opacity:.7}
 .tink-wires .wire-cyan{stroke:#35b9bb;filter:drop-shadow(0 1px 1px #4c666655)}
