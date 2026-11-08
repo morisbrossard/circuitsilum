@@ -32,22 +32,22 @@ function Pin({ id, selected, onClick }) {
 }
 
 function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, setWireMode, connections, onPin, selectedPin, placed, setPlaced, selectedComponent, setSelectedComponent }) {
-  const columns = Array.from({ length: 60 }, (_, index) => index + 1);
+  const columns = Array.from({ length: 30 }, (_, index) => index + 1);
   const angle = -90 + (current - 1) * 60;
   const chips = [
     ["74LS74", "state-chip", 3, 4], ["74LS48", "decode-chip", 14, 4],
     ["74LS48", "decode-chip", 25, 4], ["74LS85", "compare-chip", 36, 4],
     ["74LS85", "compare-chip", 47, 4], ["74LS153", "mux-chip", 58, 4],
   ];
-  const HoleGroup = ({ side }) => <div className={`hole-groups ${side}`}>{Array.from({ length: 60 }, (_, column) => <div className="hole-column" key={column}>{Array.from({ length: 5 }, (_, hole) => <span key={hole} />)}</div>)}</div>;
+  const HoleGroup = ({ side }) => <div className={`hole-groups ${side}`}>{columns.map((column) => <div className="hole-column" key={column}>{Array.from({ length: 5 }, (_, hole) => <span key={hole} />)}</div>)}</div>;
   const Chip = ({ name, tone, column, row }) => <div className={`tink-chip ${tone}`} style={{ left: `${column * 14 + 46}px`, top: `${row * 30 + 132}px` }}><i className="chip-notch" /><b>{name}</b><div className="chip-legs top">{Array.from({ length: 7 }, (_, index) => <span key={index} />)}</div><div className="chip-legs bottom">{Array.from({ length: 7 }, (_, index) => <span key={index} />)}</div></div>;
   return <section className="canvas-wrap">
     <div className="canvas-toolbar"><div className="tool-group"><button className={`tool ${!wireMode ? "active" : ""}`} onClick={() => setWireMode(false)}>↖ <span>Seleccionar</span></button><button className={`tool ${wireMode ? "active" : ""}`} onClick={() => setWireMode(true)}>⌁ <span>Cablear</span></button><button className="tool">✥ <span>Mover lienzo</span></button></div><div className="canvas-controls"><button onClick={() => setZoom(Math.max(70, zoom - 10))}>−</button><span>{zoom}%</span><button onClick={() => setZoom(Math.min(140, zoom + 10))}>＋</button><span className="divider" /><button onClick={() => setZoom(100)}>⌗ Ajustar</button></div></div>
     <div className="canvas tink-workspace" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const data = JSON.parse(event.dataTransfer.getData("component") || "{}"); if (!data.label) return; const rect = event.currentTarget.getBoundingClientRect(); setPlaced((items) => [...items, { id: `${data.id}-${Date.now()}`, ...data, x: event.clientX - rect.left, y: event.clientY - rect.top }]); }}>
       <div className="tink-header"><div><b>Ascensor digital</b><span>Diseño físico · protoboard</span></div><div className="tink-status"><span /> Guardado ahora</div></div>
       <div className="tink-stage"><div className="tink-board">
-        <div className="board-rail rail-top"><b>+</b>{columns.map((column) => <i key={column} />)}<b>−</b></div>
-        <div className="board-rail rail-bottom"><b>+</b>{columns.map((column) => <i key={column} />)}<b>−</b></div>
+        <div className="board-rail rail-top"><b>+</b><span className="rail-track">{columns.map((column) => <i key={column} />)}{columns.map((column) => <i key={`second-${column}`} />)}</span><b>−</b></div>
+        <div className="board-rail rail-bottom"><b>+</b><span className="rail-track">{columns.map((column) => <i key={column} />)}{columns.map((column) => <i key={`second-${column}`} />)}</span><b>−</b></div>
         <div className="board-scale top">{columns.filter((column) => column % 5 === 0).map((column) => <b key={column}>{column}</b>)}</div>
         <HoleGroup side="upper" /><HoleGroup side="lower" /><div className="tink-channel" />
         <div className="board-markers upper-marker">a&nbsp; b&nbsp; c&nbsp; d&nbsp; e</div><div className="board-markers lower-marker">f&nbsp; g&nbsp; h&nbsp; i&nbsp; j</div>
@@ -59,7 +59,7 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
         <div className="arduino-mini"><b>ARDUINO UNO</b><small>CONTROL</small><div>{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</div></div>
         <div className="servo-mini"><span className="servo-knob" style={{ transform: `rotate(${angle}deg)` }} /><b>SG90</b></div>
         <svg className="tink-wires" viewBox="0 0 980 560" preserveAspectRatio="none"><path className="wire-red" d="M120 115 C155 90 190 90 225 115" /><path className="wire-blue" d="M240 115 C290 75 330 75 380 115" /><path className="wire-yellow" d="M425 115 C470 95 505 95 545 115" /><path className="wire-green" d="M300 355 C350 385 390 385 430 355" /><path className="wire-purple" d="M520 355 C570 395 620 395 675 355" />{connections.map((connection) => <path key={connection.id} d={connection.path} className="wire-cyan" />)}</svg>
-        <div className="tink-contact-overlay">{Array.from({ length: 600 }, (_, index) => <button key={index} className={`tink-contact ${selectedPin === `contact:${index}` ? "selected" : ""}`} onClick={() => onPin(`contact:${index}`)} title={`Contacto ${index + 1}`} />)}</div>
+        <div className="tink-contact-overlay">{Array.from({ length: 300 }, (_, index) => <button key={index} className={`tink-contact ${selectedPin === `contact:${index}` ? "selected" : ""}`} onClick={() => onPin(`contact:${index}`)} title={`Contacto ${index + 1}`} />)}</div>
         {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
       </div></div>
       <div className={`connection-help ${wireMode ? "visible" : ""}`}>{wireMode ? "Selecciona dos contactos para conectar" : "Arrastra componentes desde la biblioteca y conéctalos por sus contactos"}</div>
