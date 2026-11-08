@@ -30,6 +30,20 @@ function Pin({ id, selected, onClick }) {
 function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, setWireMode, connections, onPin, selectedPin, placed, setPlaced, selectedComponent, setSelectedComponent }) {
   const canvasRef = useRef(null);
   const pan = useRef(null);
+  const workspaceSize = useMemo(() => {
+    const bounds = placed.reduce((result, item) => {
+      const width = item.kind === "breadboard" ? 980 : 140;
+      const height = item.kind === "breadboard" ? 560 : 90;
+      return {
+        width: Math.max(result.width, item.x + width + 160),
+        height: Math.max(result.height, item.y + height + 160),
+      };
+    }, { width: 2240, height: 1440 });
+    return {
+      width: Math.max(2240, Math.ceil(bounds.width)),
+      height: Math.max(1440, Math.ceil(bounds.height)),
+    };
+  }, [placed]);
   const columns = Array.from({ length: 30 }, (_, index) => index + 1);
   const angle = -90 + (current - 1) * 60;
   const chips = [
@@ -43,8 +57,8 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
     <div className="canvas-toolbar"><div className="tool-group"><button className={`tool ${!wireMode ? "active" : ""}`} onClick={() => setWireMode(false)}>↖ <span>Seleccionar</span></button><button className={`tool ${wireMode ? "active" : ""}`} onClick={() => setWireMode(true)}>⌁ <span>Cablear</span></button><button className="tool">✥ <span>Mover lienzo</span></button></div><div className="canvas-controls"><button onClick={() => setZoom(Math.max(70, zoom - 10))}>−</button><span>{zoom}%</span><button onClick={() => setZoom(Math.min(140, zoom + 10))}>＋</button><span className="divider" /><button onClick={() => setZoom(100)}>⌗ Ajustar</button></div></div>
     <div ref={canvasRef} className="canvas tink-workspace" onPointerDown={(event) => { if (event.button !== 1 && !(event.button === 0 && event.getModifierState("Space"))) return; event.preventDefault(); pan.current = { x: event.clientX, y: event.clientY, left: event.currentTarget.scrollLeft, top: event.currentTarget.scrollTop }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={(event) => { if (!pan.current) return; event.currentTarget.scrollLeft = pan.current.left - (event.clientX - pan.current.x); event.currentTarget.scrollTop = pan.current.top - (event.clientY - pan.current.y); }} onPointerUp={() => { pan.current = null; }} onWheel={(event) => { if (!event.ctrlKey) return; event.preventDefault(); setZoom((value) => Math.min(140, Math.max(70, value + (event.deltaY < 0 ? 10 : -10)))); }} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const data = JSON.parse(event.dataTransfer.getData("component") || "{}"); if (!data.label) return; const canvas = event.currentTarget; const rect = canvas.getBoundingClientRect(); const scale = zoom / 100; setPlaced((items) => [...items, { id: `${data.id}-${Date.now()}`, ...data, x: (event.clientX - rect.left + canvas.scrollLeft) / scale, y: (event.clientY - rect.top + canvas.scrollTop) / scale, rotation: 0 }]); }}>
       <div className="tink-header"><div><b>Ascensor digital</b><span>Diseño físico · protoboard</span></div><div className="tink-status"><span /> Guardado ahora</div></div>
-      <div className="tink-stage clean-stage" style={{ zoom: `${zoom}%` }}>
-        <div className="empty-workspace">
+      <div className="tink-stage clean-stage" style={{ width: workspaceSize.width, minWidth: workspaceSize.width, height: workspaceSize.height, minHeight: workspaceSize.height, zoom: `${zoom}%` }}>
+        <div className="empty-workspace" style={{ width: workspaceSize.width - 160, minWidth: workspaceSize.width - 160, height: workspaceSize.height - 160, minHeight: workspaceSize.height - 160 }}>
           {!placed.length && <div className="empty-workspace-copy"><b>Lienzo vacío</b><span>Arrastra componentes desde la biblioteca para comenzar</span></div>}
           {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
         </div>
@@ -164,7 +178,10 @@ export default function App() {
     });
   }
   function addComponent(item) {
-    commitPlaced((items) => [...items, { ...item, id: `${item.id}-${Date.now()}`, x: item.kind === "breadboard" ? 24 : 180 + (items.length % 5) * 105, y: item.kind === "breadboard" ? 64 : 180 + Math.floor(items.length / 5) * 70, rotation: 0 }]);
+    commitPlaced((items) => {
+      const breadboardCount = items.filter(({ kind }) => kind === "breadboard").length;
+      return [...items, { ...item, id: `${item.id}-${Date.now()}`, x: item.kind === "breadboard" ? 24 : 180 + (items.length % 5) * 105, y: item.kind === "breadboard" ? 64 + breadboardCount * 600 : 180 + Math.floor(items.length / 5) * 70, rotation: 0 }];
+    });
   }
   function undo() {
     setPast((items) => {
