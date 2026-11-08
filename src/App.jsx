@@ -17,7 +17,7 @@ function Sidebar({ onComponent, search, setSearch }) {
     <div className="brand"><div className="brand-mark"><span /><span /><span /></div><div><strong>Circuit<span>Lab</span></strong><small>Digital circuit studio</small></div></div>
     <div className="sidebar-section"><div className="section-label">Proyecto</div><button className="project-card active"><span className="project-icon">⌁</span><span><b>Ascensor 4 pisos</b><small>Simulación principal</small></span><i>•••</i></button><button className="new-project"><span>＋</span> Nuevo proyecto</button></div>
     <div className="sidebar-section library"><div className="section-label">Biblioteca <kbd>⌘ K</kbd></div><label className="search"><span>⌕</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar componente..." /></label>
-      {components.map(([group, items]) => <div className="library-group" key={group}><div className="group-title">{group} <span>⌃</span></div>{items.filter(([, , label]) => label.toLowerCase().includes(search.toLowerCase())).map(([id, glyph, label, part]) => <button className="library-item" key={id} onClick={() => onComponent(label)}><Icon tone={group === "Entradas" ? "input-glyph" : group === "Lógica" ? "logic-glyph" : "output-glyph"}>{glyph}</Icon>{label}<em>{part}</em></button>)}</div>)}
+      {components.map(([group, items]) => <div className="library-group" key={group}><div className="group-title">{group} <span>⌃</span></div>{items.filter(([, , label]) => label.toLowerCase().includes(search.toLowerCase())).map(([id, glyph, label, part]) =>       <button className="library-item" draggable onDragStart={(event) => event.dataTransfer.setData("component", JSON.stringify({ id, label, part, glyph }))} key={id} onClick={() => onComponent(label)}><Icon tone={group === "Entradas" ? "input-glyph" : group === "Lógica" ? "logic-glyph" : "output-glyph"}>{glyph}</Icon>{label}<em>{part}</em></button>)}</div>)}
     </div>
     <div className="sidebar-bottom"><div className="status-row"><span className="status-dot" /> Simulador online <span className="live">LIVE</span></div><button className="user"><span className="avatar">JM</span><span><b>Juan Manuel</b><small>Personal workspace</small></span><span className="more">⌄</span></button></div>
   </aside>;
@@ -31,13 +31,13 @@ function Pin({ id, selected, onClick }) {
   return <button className={`connection-pin ${selected ? "selected" : ""}`} title={`Conectar ${id}`} onClick={(event) => { event.stopPropagation(); onClick(id); }} />;
 }
 
-function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, setWireMode, connections, onPin, selectedPin }) {
+function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, setWireMode, connections, onPin, selectedPin, placed, setPlaced, selectedComponent, setSelectedComponent }) {
   const columns = Array.from({ length: 30 }, (_, index) => index + 1);
   const rails = Array.from({ length: 4 }, (_, index) => index);
   const angle = -90 + (current - 1) * 60;
   const Dip = ({ className, name, pins }) => <div className={`real-dip ${className}`}><div className="dip-notch" /><b>{name}</b><div className="dip-pins top">{pins.slice(0, pins.length / 2).map((pin) => <span key={pin}><i />{pin}</span>)}</div><div className="dip-pins bottom">{pins.slice(pins.length / 2).reverse().map((pin) => <span key={pin}><i />{pin}</span>)}</div></div>;
   return <section className="canvas-wrap"><div className="canvas-toolbar"><div className="tool-group"><button className={`tool ${!wireMode ? "active" : ""}`} onClick={() => setWireMode(false)}>↖ <span>Seleccionar</span></button><button className={`tool ${wireMode ? "active" : ""}`} onClick={() => setWireMode(true)}>⌁ <span>Cablear</span></button><button className="tool">✥ <span>Mover lienzo</span></button></div><div className="canvas-controls"><button onClick={() => setZoom(Math.max(70, zoom - 10))}>−</button><span>{zoom}%</span><button onClick={() => setZoom(Math.min(140, zoom + 10))}>＋</button><span className="divider" /><button onClick={() => setZoom(100)}>⌗ Ajustar</button></div></div>
-    <div className="canvas breadboard-canvas"><div className="breadboard-title"><div><b>Ascensor digital</b><span>Protoboard · vista de diseño</span></div><div className="canvas-status"><span /> Simulación detenida</div></div><div className="breadboard">
+    <div className="canvas breadboard-canvas" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const data = JSON.parse(event.dataTransfer.getData("component") || "{}"); if (!data.label) return; const rect = event.currentTarget.getBoundingClientRect(); setPlaced((items) => [...items, { id: `${data.id}-${Date.now()}`, ...data, x: event.clientX - rect.left, y: event.clientY - rect.top }]); }}><div className="breadboard-title"><div><b>Ascensor digital</b><span>Protoboard · vista de diseño</span></div><div className="canvas-status"><span /> Simulación detenida</div></div><div className="breadboard">
       <div className="power-rail positive">+ <span>{columns.map((column) => <i key={column} />)}</span></div><div className="power-rail negative">− <span>{columns.map((column) => <i key={column} />)}</span></div>
       <div className="board-numbers top">{columns.map((column) => <b key={column}>{column}</b>)}</div><div className="board-numbers bottom">{columns.map((column) => <b key={column}>{column}</b>)}</div>
       <div className="terminal-field upper">{rails.map((rail) => <div className="terminal-row" key={rail}>{columns.map((column) => <span key={column} className="contact" />)}</div>)}</div><div className="center-groove" /><div className="terminal-field lower">{rails.map((rail) => <div className="terminal-row" key={rail}>{columns.map((column) => <span key={column} className="contact" />)}</div>)}</div>
@@ -58,9 +58,16 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
       <div className="micro-board raspberry-board"><b>RASPBERRY PI</b><small>USB · AUDIO</small><div className="header-pins">{Array.from({ length: 12 }, (_, index) => <i key={index} />)}</div></div>
       <div className="camera-board"><span>◉</span><b>ESP32-CAM</b><small>VIDEO USB</small></div><div className="speaker-board">♫ <small>PARLANTE</small></div>
       <div className="servo-board"><span className="servo-knob" style={{ transform: `rotate(${angle}deg)` }} /><b>SG90</b><small>SERVO · {angle}°</small></div>
+      <div className="contact-overlay">{Array.from({ length: 60 }, (_, index) => <button key={index} className={`board-contact ${selectedPin === `contact:${index}` ? "selected" : ""}`} onClick={() => onPin(`contact:${index}`)} title={`Contacto ${index + 1}`} />)}</div>
+      {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
       <svg className="board-wires" viewBox="0 0 1200 900" preserveAspectRatio="none"><path d="M90 105 C170 160 170 210 280 250" className="board-wire red-wire" /><path d="M210 155 C310 150 280 350 410 385" className="board-wire blue-wire" /><path d="M335 120 C450 155 470 235 560 280" className="board-wire yellow-wire" /><path d="M415 510 C520 460 570 430 710 445" className="board-wire green-wire" /><path d="M720 390 C820 330 890 310 990 340" className="board-wire orange-wire" />{connections.map((connection) => <path key={connection.id} d={connection.path} className="board-wire cyan-wire" />)}</svg>
       <div className={`connection-help ${wireMode ? "visible" : ""}`}>{wireMode ? "Selecciona dos pines para crear una conexión física" : "Cableado visible · activa Cablear para añadir conexiones"}</div>
     </div></div></section>;
+}
+
+function DraggableComponent({ item, selected, onSelect, onMove }) {
+  const start = useRef(null);
+  return <div className={`placed-component ${selected ? "selected" : ""}`} style={{ left: item.x, top: item.y }} onClick={(event) => { event.stopPropagation(); onSelect(); }} onPointerDown={(event) => { event.currentTarget.setPointerCapture(event.pointerId); start.current = { x: event.clientX - item.x, y: event.clientY - item.y }; }} onPointerMove={(event) => { if (start.current) onMove(event.clientX - start.current.x, event.clientY - start.current.y); }} onPointerUp={() => { start.current = null; }}><Icon tone="logic-glyph">{item.glyph}</Icon><b>{item.label}</b><small>{item.part}</small></div>;
 }
 
 function Inspector({ current, call, destination, setCall, setDestination, run, running, progress, mode, setMode }) {
@@ -84,7 +91,7 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [wireMode, setWireMode] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
-  const [connections, setConnections] = useState([]);
+  const [connections, setConnections] = useState(() => JSON.parse(localStorage.getItem("circuitsim-connections") || "[]"));
   const timer = useRef(null);
   const logs = useMemo(() => [`Comparando piso actual ${bits(current)} con destino ${bits(destination)}...`, `Registro de llamada actualizado Q = ${bits(call)}`], [current, call, destination]);
 
@@ -100,7 +107,13 @@ export default function App() {
       return;
     }
     const id = `${selectedPin}-${pin}`;
-    setConnections((items) => [...items, { id, path: "M880 670 C930 670 940 730 1000 730" }]);
+    const point = (value) => {
+      const index = Number(value.split(":")[1] || 0);
+      return { x: 90 + (index % 30) * 28, y: 80 + Math.floor(index / 30) * 20 };
+    };
+    const first = point(selectedPin);
+    const second = point(pin);
+    setConnections((items) => [...items, { id, from: selectedPin, to: pin, path: `M${first.x} ${first.y} C${first.x + 70} ${first.y} ${second.x - 70} ${second.y} ${second.x} ${second.y}` }]);
     setSelectedPin(null);
   }
   function run() {
@@ -124,5 +137,11 @@ export default function App() {
       floor += floor < target ? 1 : -1; setCurrent(floor);
     }, 600);
   }
-  return <div className="app-shell"><Sidebar search={search} setSearch={setSearch} onComponent={(name) => console.info(`${name} seleccionado`)} /><main className="workspace"><header className="topbar"><div className="breadcrumbs"><span>Mis proyectos</span><b>/</b><strong>Ascensor 4 pisos</strong><span className="saved">● Guardado ahora</span></div><div className="top-actions"><button className="icon-button">↶</button><button className="icon-button">↷</button><span className="divider" /><button className="ghost-button">Compartir</button><button className="primary-button" onClick={run}><span>▶</span> Simular</button></div></header><CircuitCanvas current={current} call={call} destination={destination} zoom={zoom} setZoom={setZoom} wireMode={wireMode} setWireMode={(enabled) => { setWireMode(enabled); setSelectedPin(null); }} connections={connections} onPin={connectPin} selectedPin={selectedPin} /><section className="bottom-panel"><div className="panel-tabs"><button className="panel-tab active">Consola</button><button className="panel-tab">Propiedades</button><button className="panel-tab">Tabla de verdad</button><span className="panel-expand">⌃</span></div><div className="console">{logs.map((log) => <div className="console-line" key={log}><span className="console-time">10:03:21</span><span className="console-info">●</span> {log}</div>)}<div className="console-cursor">_</div></div></section></main><Inspector current={current} call={call} destination={destination} setCall={setCall} setDestination={setDestination} run={run} running={running} progress={progress} mode={mode} setMode={setMode} /></div>;
+  const [placed, setPlaced] = useState(() => JSON.parse(localStorage.getItem("circuitsim-placed") || "[]"));
+  const [selectedComponent, setSelectedComponent] = useState(null);
+  useEffect(() => localStorage.setItem("circuitsim-placed", JSON.stringify(placed)), [placed]);
+  useEffect(() => localStorage.setItem("circuitsim-connections", JSON.stringify(connections)), [connections]);
+  const selected = placed.find((item) => item.id === selectedComponent);
+  const validation = connections.length === 0 ? "Sin conexiones añadidas" : connections.some((wire) => wire.from.includes("5V") && wire.to.includes("GND")) || connections.some((wire) => wire.from.includes("GND") && wire.to.includes("5V")) ? "Advertencia: posible cortocircuito 5V-GND" : "Conexiones sin cortocircuitos detectados";
+  return <div className="app-shell"><Sidebar search={search} setSearch={setSearch} onComponent={(name) => console.info(`${name} seleccionado`)} /><main className="workspace"><header className="topbar"><div className="breadcrumbs"><span>Mis proyectos</span><b>/</b><strong>Ascensor 4 pisos</strong><span className="saved">● Guardado ahora</span></div><div className="top-actions"><button className="icon-button">↶</button><button className="icon-button">↷</button><span className="divider" /><button className="ghost-button">Compartir</button><button className="primary-button" onClick={run}><span>▶</span> Simular</button></div></header><CircuitCanvas current={current} call={call} destination={destination} zoom={zoom} setZoom={setZoom} wireMode={wireMode} setWireMode={(enabled) => { setWireMode(enabled); setSelectedPin(null); }} connections={connections} onPin={connectPin} selectedPin={selectedPin} placed={placed} setPlaced={setPlaced} selectedComponent={selectedComponent} setSelectedComponent={setSelectedComponent} /><section className="bottom-panel"><div className="panel-tabs"><button className="panel-tab active">Consola</button><button className="panel-tab">Propiedades</button><span className="panel-expand">⌃</span></div><div className="console">{logs.map((log) => <div className="console-line" key={log}><span className="console-time">10:03:21</span><span className="console-info">●</span> {log}</div>)}<div className="console-line"><span className="console-info">●</span> {validation}</div>{selected && <div className="console-line"><span className="console-ok">✓</span> Seleccionado: <b>{selected.label}</b> · posición {Math.round(selected.x)}, {Math.round(selected.y)}</div>}<div className="console-cursor">_</div></div></section></main><Inspector current={current} call={call} destination={destination} setCall={setCall} setDestination={setDestination} run={run} running={running} progress={progress} mode={mode} setMode={setMode} /></div>;
 }
