@@ -41,23 +41,12 @@ function CircuitCanvas({ current, call, destination, zoom, setZoom, wireMode, se
     <div className="canvas-toolbar"><div className="tool-group"><button className={`tool ${!wireMode ? "active" : ""}`} onClick={() => setWireMode(false)}>↖ <span>Seleccionar</span></button><button className={`tool ${wireMode ? "active" : ""}`} onClick={() => setWireMode(true)}>⌁ <span>Cablear</span></button><button className="tool">✥ <span>Mover lienzo</span></button></div><div className="canvas-controls"><button onClick={() => setZoom(Math.max(70, zoom - 10))}>−</button><span>{zoom}%</span><button onClick={() => setZoom(Math.min(140, zoom + 10))}>＋</button><span className="divider" /><button onClick={() => setZoom(100)}>⌗ Ajustar</button></div></div>
     <div className="canvas tink-workspace" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const data = JSON.parse(event.dataTransfer.getData("component") || "{}"); if (!data.label) return; const rect = event.currentTarget.getBoundingClientRect(); setPlaced((items) => [...items, { id: `${data.id}-${Date.now()}`, ...data, x: event.clientX - rect.left, y: event.clientY - rect.top }]); }}>
       <div className="tink-header"><div><b>Ascensor digital</b><span>Diseño físico · protoboard</span></div><div className="tink-status"><span /> Guardado ahora</div></div>
-      <div className="tink-stage"><div className="tink-board">
-        <div className="board-rail rail-top"><b>+</b><span className="rail-track">{columns.map((column) => <i key={column} />)}{columns.map((column) => <i key={`second-${column}`} />)}</span><b>−</b></div>
-        <div className="board-rail rail-bottom"><b>+</b><span className="rail-track">{columns.map((column) => <i key={column} />)}{columns.map((column) => <i key={`second-${column}`} />)}</span><b>−</b></div>
-        <div className="board-scale top">{columns.filter((column) => column % 5 === 0).map((column) => <b key={column}>{column}</b>)}</div>
-        <HoleGroup side="upper" /><HoleGroup side="lower" /><div className="tink-channel" />
-        <div className="board-markers upper-marker">a&nbsp; b&nbsp; c&nbsp; d&nbsp; e</div><div className="board-markers lower-marker">f&nbsp; g&nbsp; h&nbsp; i&nbsp; j</div>
-        <div className="floor-switch">{[1, 2, 3, 4].map((floor) => <button className={call === floor ? "on" : ""} key={floor} onClick={() => onPin(`floor:${floor}`)}>{floor}</button>)}</div>
-        <div className="seven-segment call-seven">{call}</div><div className="seven-segment destination-seven">{destination}</div>
-        {chips.map(([name, tone, column, row]) => <Chip key={`${name}-${column}`} name={name} tone={tone} column={column} row={row} />)}
-        <div className="led-strip">{[1, 2, 3, 4].map((floor) => <div key={floor}><span className={current === floor ? "lit" : ""} /><small>P{floor}</small></div>)}</div>
-        <div className="resistor-strip">{[1, 2, 3, 4, 5].map((item) => <span key={item}><i />220Ω<i /></span>)}</div>
-        <div className="arduino-mini"><b>ARDUINO UNO</b><small>CONTROL</small><div>{Array.from({ length: 8 }, (_, index) => <i key={index} />)}</div></div>
-        <div className="servo-mini"><span className="servo-knob" style={{ transform: `rotate(${angle}deg)` }} /><b>SG90</b></div>
-        <svg className="tink-wires" viewBox="0 0 980 560" preserveAspectRatio="none">{connections.map((connection) => <path key={connection.id} d={connection.path} className={`wire-cyan ${connection.color || ""}`} />)}</svg>
-        <div className="tink-contact-overlay">{Array.from({ length: 300 }, (_, index) => <button key={index} className={`tink-contact ${selectedPin === `contact:${index}` ? "selected" : ""}`} onClick={() => onPin(`contact:${index}`)} title={`Contacto ${index + 1}`} />)}</div>
-        {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
-      </div></div>
+      <div className="tink-stage clean-stage">
+        <div className="empty-workspace">
+          <div className="empty-workspace-copy"><b>Lienzo vacío</b><span>Arrastra componentes desde la biblioteca para comenzar</span></div>
+          {placed.map((item) => <DraggableComponent key={item.id} item={item} selected={selectedComponent === item.id} onSelect={() => setSelectedComponent(item.id)} onMove={(x, y) => setPlaced((items) => items.map((entry) => entry.id === item.id ? { ...entry, x, y } : entry))} />)}
+        </div>
+      </div>
       <div className={`connection-help ${wireMode ? "visible" : ""}`}>{wireMode ? "Selecciona dos contactos para conectar" : "Arrastra componentes desde la biblioteca y conéctalos por sus contactos"}</div>
     </div>
   </section>;

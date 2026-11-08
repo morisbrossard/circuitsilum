@@ -216,6 +216,14 @@ body{overflow:auto}
 .tink-board:after{opacity:.7}
 .tink-wires .wire-cyan{stroke:#35b9bb;filter:drop-shadow(0 1px 1px #4c666655)}
 .wire-red,.wire-blue,.wire-yellow,.wire-green,.wire-purple{display:none!important}
+
+/* Start with an uncluttered canvas. The physical board is added by the user
+   from the library instead of being a hard-coded background scene. */
+.clean-stage{min-height:calc(100% - 58px);padding:24px!important;display:block!important}
+.empty-workspace{position:relative;min-width:760px;min-height:520px;height:100%;border:1px dashed #c5cdd2;border-radius:8px;background:#eef1f3;overflow:hidden}
+.empty-workspace-copy{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#8a969d;pointer-events:none}
+.empty-workspace-copy b{font-size:14px;color:#66737b}.empty-workspace-copy span{font-size:11px;margin-top:6px}
+.empty-workspace .placed-component{z-index:3}
 .tink-contact-overlay{left:61px;right:61px;top:76px;height:453px;grid-template-columns:repeat(30,minmax(0,1fr));grid-template-rows:repeat(5,28px) 161px repeat(5,28px);column-gap:0}
 .tink-contact:nth-child(5n){margin-right:0}
 
