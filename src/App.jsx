@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
-const components = [
-  ["Entradas", [["pushbutton", "●", "Pushbutton", "IN"], ["switch", "↔", "Switch", "IN"], ["clock", "◷", "Clock", "CLK"]]],
-  ["Lógica", [["and", "∧", "AND gate", "74LS08"], ["or", "≥1", "OR gate", "74LS32"], ["xor", "⊻", "XOR gate", "74LS86"], ["not", "¬", "NOT gate", "74LS04"], ["mux", "▱", "Multiplexer", "74LS153"]]],
-  ["Memoria & salida", [["flipflop", "D", "Flip-Flop D", "74LS74"], ["display", "▦", "7-segment", "74LS48"], ["led", "✦", "LED", "OUT"], ["servo", "⌁", "Servo SG90", "OUT"]]],
-  ["Control físico", [["arduino", "A", "Arduino", "MCU"], ["raspberry", "π", "Raspberry Pi", "HOST"], ["camera", "◉", "ESP32-CAM", "CAM"], ["speaker", "♫", "Parlante", "AUDIO"]]],
-];
+import { componentCatalog } from "./domain/componentCatalog";
+import { validateElectricalConnections } from "./domain/electricalGraph";
 const bits = (floor) => (floor - 1).toString(2).padStart(2, "0");
 
 function Icon({ children, tone = "" }) {
@@ -17,7 +12,7 @@ function Sidebar({ onComponent, search, setSearch }) {
     <div className="brand"><div className="brand-mark"><span /><span /><span /></div><div><strong>Circuit<span>Lab</span></strong><small>Digital circuit studio</small></div></div>
     <div className="sidebar-section"><div className="section-label">Proyecto</div><button className="project-card active"><span className="project-icon">⌁</span><span><b>Ascensor 4 pisos</b><small>Simulación principal</small></span><i>•••</i></button><button className="new-project"><span>＋</span> Nuevo proyecto</button></div>
     <div className="sidebar-section library"><div className="section-label">Biblioteca <kbd>⌘ K</kbd></div><label className="search"><span>⌕</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar componente..." /></label>
-      {components.map(([group, items]) => <div className="library-group" key={group}><div className="group-title">{group} <span>⌃</span></div>{items.filter(([, , label]) => label.toLowerCase().includes(search.toLowerCase())).map(([id, glyph, label, part]) =>       <button className="library-item" draggable onDragStart={(event) => event.dataTransfer.setData("component", JSON.stringify({ id, label, part, glyph }))} key={id} onClick={() => onComponent(label)}><Icon tone={group === "Entradas" ? "input-glyph" : group === "Lógica" ? "logic-glyph" : "output-glyph"}>{glyph}</Icon>{label}<em>{part}</em></button>)}</div>)}
+      {componentCatalog.map(({ group, items }) => <div className="library-group" key={group}><div className="group-title">{group} <span>⌃</span></div>{items.filter(({ label }) => label.toLowerCase().includes(search.toLowerCase())).map((item) => <button className="library-item" draggable onDragStart={(event) => event.dataTransfer.setData("component", JSON.stringify(item))} key={item.id} onClick={() => onComponent(item.label)}><Icon tone={group === "Entradas" ? "input-glyph" : group === "Lógica" ? "logic-glyph" : "output-glyph"}>{item.glyph}</Icon>{item.label}<em>{item.part}</em></button>)}</div>)}
     </div>
     <div className="sidebar-bottom"><div className="status-row"><span className="status-dot" /> Simulador online <span className="live">LIVE</span></div><button className="user"><span className="avatar">JM</span><span><b>Juan Manuel</b><small>Personal workspace</small></span><span className="more">⌄</span></button></div>
   </aside>;
@@ -144,6 +139,7 @@ export default function App() {
   useEffect(() => localStorage.setItem("circuitsim-placed", JSON.stringify(placed)), [placed]);
   useEffect(() => localStorage.setItem("circuitsim-connections", JSON.stringify(connections)), [connections]);
   const selected = placed.find((item) => item.id === selectedComponent);
-  const validation = connections.length === 0 ? "Sin conexiones añadidas" : connections.some((wire) => wire.from.includes("5V") && wire.to.includes("GND")) || connections.some((wire) => wire.from.includes("GND") && wire.to.includes("5V")) ? "Advertencia: posible cortocircuito 5V-GND" : "Conexiones sin cortocircuitos detectados";
+  const diagnostics = validateElectricalConnections(connections);
+  const validation = connections.length === 0 ? "Sin conexiones añadidas" : diagnostics.length ? "Advertencia: posible cortocircuito de alimentación" : "Conexiones sin cortocircuitos detectados";
   return <div className="app-shell"><Sidebar search={search} setSearch={setSearch} onComponent={(name) => console.info(`${name} seleccionado`)} /><main className="workspace"><header className="topbar"><div className="breadcrumbs"><span>Mis proyectos</span><b>/</b><strong>Ascensor 4 pisos</strong><span className="saved">● Guardado ahora</span></div><div className="top-actions"><button className="icon-button">↶</button><button className="icon-button">↷</button><span className="divider" /><button className="ghost-button">Compartir</button><button className="primary-button" onClick={run}><span>▶</span> Simular</button></div></header><CircuitCanvas current={current} call={call} destination={destination} zoom={zoom} setZoom={setZoom} wireMode={wireMode} setWireMode={(enabled) => { setWireMode(enabled); setSelectedPin(null); }} connections={connections} onPin={connectPin} selectedPin={selectedPin} placed={placed} setPlaced={setPlaced} selectedComponent={selectedComponent} setSelectedComponent={setSelectedComponent} /><section className="bottom-panel"><div className="panel-tabs"><button className="panel-tab active">Consola</button><button className="panel-tab">Propiedades</button><span className="panel-expand">⌃</span></div><div className="console">{logs.map((log) => <div className="console-line" key={log}><span className="console-time">10:03:21</span><span className="console-info">●</span> {log}</div>)}<div className="console-line"><span className="console-info">●</span> {validation}</div>{selected && <div className="console-line"><span className="console-ok">✓</span> Seleccionado: <b>{selected.label}</b> · posición {Math.round(selected.x)}, {Math.round(selected.y)}</div>}<div className="console-cursor">_</div></div></section></main><Inspector current={current} call={call} destination={destination} setCall={setCall} setDestination={setDestination} run={run} running={running} progress={progress} mode={mode} setMode={setMode} /></div>;
 }

@@ -1,0 +1,92 @@
+export const simulationLevels = {
+  complete: "complete",
+  partial: "partial",
+  visual: "visual",
+  external: "external",
+};
+
+const digital = (id, label, part, glyph = "▣", simulation = simulationLevels.partial, pins = []) => ({
+  id,
+  label,
+  part,
+  glyph,
+  category: "Circuitos integrados digitales",
+  family: part.startsWith("74LS") ? "TTL 74LS" : part.startsWith("CD") ? "CMOS 4000" : "Digital",
+  package: "DIP",
+  simulation,
+  pins,
+  voltage: { min: 4.5, max: 5.5 },
+});
+
+export const componentCatalog = [
+  { group: "Entradas", items: [
+    { id: "pushbutton", label: "Pushbutton", part: "IN", glyph: "●", category: "Elementos de interacción", simulation: simulationLevels.complete },
+    { id: "switch", label: "Switch", part: "IN", glyph: "↔", category: "Elementos de interacción", simulation: simulationLevels.complete },
+    { id: "clock", label: "Clock", part: "CLK", glyph: "◷", category: "Temporización", simulation: simulationLevels.complete },
+    { id: "dip-switch", label: "DIP switch", part: "IN", glyph: "▥", category: "Elementos de interacción", simulation: simulationLevels.complete },
+    { id: "keypad", label: "Teclado matricial", part: "IN", glyph: "⌗", category: "Elementos de interacción", simulation: simulationLevels.partial },
+    { id: "encoder", label: "Encoder rotatorio", part: "IN", glyph: "◉", category: "Elementos de interacción", simulation: simulationLevels.partial },
+  ] },
+  { group: "Lógica", items: [
+    digital("and", "AND gate", "74LS08", "∧", simulationLevels.complete),
+    digital("or", "OR gate", "74LS32", "≥1", simulationLevels.complete),
+    digital("not", "NOT gate", "74LS04", "¬", simulationLevels.complete),
+    digital("nand", "NAND gate", "74LS00", "⊼"),
+    digital("nor", "NOR gate", "74LS02", "⊽"),
+    digital("xor", "XOR gate", "74LS86", "⊻", simulationLevels.complete),
+    digital("xnor", "XNOR gate", "74LS266", "≡"),
+    digital("mux", "Multiplexer", "74LS153", "▱", simulationLevels.partial),
+    digital("demux", "Demultiplexer", "74LS157", "▰"),
+    digital("decoder", "Decoder", "74LS138", "▦"),
+    digital("encoder", "Encoder", "74LS148", "▤"),
+    digital("comparator", "Comparator", "74LS85", "≷", simulationLevels.partial),
+    digital("adder", "Binary adder", "74LS283", "＋"),
+  ] },
+  { group: "Memoria & conteo", items: [
+    digital("flipflop", "Flip-Flop D", "74LS74", "D", simulationLevels.partial),
+    digital("jk-flipflop", "Flip-Flop JK", "74LS76", "J"),
+    digital("counter", "Counter", "74LS93", "↻"),
+    digital("counter-sync", "Synchronous counter", "74LS161", "↻"),
+    digital("shift-register", "Shift register", "74LS164", "⇥"),
+    digital("storage-register", "Storage register", "74LS194", "▤"),
+    digital("timer", "Timer", "NE555", "◷", simulationLevels.partial),
+    digital("memory", "Memory", "RAM", "▥", simulationLevels.visual),
+  ] },
+  { group: "CMOS 4000", items: [
+    digital("cd4001", "NOR CMOS", "CD4001", "⊽"),
+    digital("cd4011", "NAND CMOS", "CD4011", "⊼"),
+    digital("cd4017", "Decade counter", "CD4017", "↻"),
+    digital("cd4026", "Counter/display", "CD4026", "▦"),
+    digital("cd4511", "BCD decoder", "CD4511", "▦"),
+    digital("cd4514", "Decoder", "CD4514", "▤"),
+  ] },
+  { group: "Pasivos y semiconductores", items: [
+    { id: "resistor", label: "Resistor", part: "R", glyph: "▱", category: "Pasivos", simulation: simulationLevels.complete },
+    { id: "capacitor", label: "Ceramic capacitor", part: "C", glyph: "||", category: "Pasivos", simulation: simulationLevels.partial },
+    { id: "electrolytic", label: "Electrolytic capacitor", part: "C", glyph: "||", category: "Pasivos", simulation: simulationLevels.partial },
+    { id: "potentiometer", label: "Potentiometer", part: "POT", glyph: "⌁", category: "Pasivos", simulation: simulationLevels.partial },
+    { id: "diode", label: "Diode", part: "D", glyph: "▷", category: "Semiconductores", simulation: simulationLevels.partial },
+    { id: "led", label: "LED", part: "OUT", glyph: "✦", category: "Semiconductores", simulation: simulationLevels.complete },
+    { id: "transistor-npn", label: "NPN transistor", part: "Q", glyph: "N", category: "Semiconductores", simulation: simulationLevels.partial },
+    { id: "transistor-pnp", label: "PNP transistor", part: "Q", glyph: "P", category: "Semiconductores", simulation: simulationLevels.partial },
+  ] },
+  { group: "Salidas y multimedia", items: [
+    { id: "display", label: "7-segment", part: "OUT", glyph: "▦", category: "Displays", simulation: simulationLevels.complete },
+    { id: "lcd", label: "LCD 16x2", part: "OUT", glyph: "▤", category: "Displays", simulation: simulationLevels.partial },
+    { id: "oled", label: "OLED", part: "OUT", glyph: "▣", category: "Displays", simulation: simulationLevels.partial },
+    { id: "speaker", label: "Parlante", part: "AUDIO", glyph: "♫", category: "Audio", simulation: simulationLevels.partial },
+    { id: "buzzer", label: "Buzzer", part: "AUDIO", glyph: "♪", category: "Audio", simulation: simulationLevels.partial },
+    { id: "servo", label: "Servo SG90", part: "OUT", glyph: "⌁", category: "Motores", simulation: simulationLevels.partial },
+    { id: "motor", label: "DC motor", part: "OUT", glyph: "◎", category: "Motores", simulation: simulationLevels.partial },
+    { id: "relay", label: "Relay", part: "OUT", glyph: "□", category: "Salidas", simulation: simulationLevels.partial },
+  ] },
+  { group: "Placas y controladores", items: [
+    { id: "arduino", label: "Arduino Uno", part: "MCU", glyph: "A", category: "Microcontroladores", simulation: simulationLevels.partial, voltage: { min: 0, max: 5 } },
+    { id: "arduino-mega", label: "Arduino Mega", part: "MCU", glyph: "A", category: "Microcontroladores", simulation: simulationLevels.visual },
+    { id: "esp32", label: "ESP32 DevKit", part: "MCU", glyph: "E", category: "Microcontroladores", simulation: simulationLevels.partial, voltage: { min: 0, max: 3.3 } },
+    { id: "camera", label: "ESP32-CAM", part: "CAM", glyph: "◉", category: "Cámaras", simulation: simulationLevels.external, voltage: { min: 0, max: 3.3 } },
+    { id: "raspberry", label: "Raspberry Pi 4", part: "HOST", glyph: "π", category: "SBC", simulation: simulationLevels.external, voltage: { min: 0, max: 3.3 } },
+  ] },
+];
+
+export const catalogItems = componentCatalog.flatMap(({ items }) => items);
